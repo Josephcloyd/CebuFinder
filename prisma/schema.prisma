@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DiscoverySource {
+  OSM_OVERPASS
+  GOOGLE_SEARCH_API
+  BING_SEARCH_API
+  MANUAL_ENTRY
+}
+
+enum WebsiteStatus {
+  NO_WEBSITE
+  FACEBOOK_ONLY
+  PARKED_DOMAIN
+  OUTDATED_SITE
+  BROKEN_SITE
+  FULLY_FUNCTIONAL
+}
+
+enum ContactType {
+  BUSINESS_EMAIL
+  BUSINESS_PHONE
+  FACEBOOK_MESSENGER
+  WHATSAPP
+  VIBER
+}
+
+enum OutreachStatus {
+  DRAFTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  QUEUED
+  SENT
+  FAILED
+  REPLIED
+  OPTED_OUT
+}
+
+model Business {
+  id               String          @id @default(uuid()) @db.Uuid
+  name             String
+  normalizedName   String          @map("normalized_name")
+  businessCategory String          @map("business_category")
+  description      String?
+  barangay         String
+  city             String          @default("Cebu City")
+  province         String          @default("Cebu")
+  latitude         Decimal?        @db.Decimal(10, 8)
+  longitude        Decimal?        @db.Decimal(11, 8)
+  discoverySource  DiscoverySource @map("discovery_source")
+  sourceUrl        String?         @map("source_url")
+  dateDiscovered   DateTime        @default(now()) @map("date_discovered")
+  dateLastChecked  DateTime        @default(now()) @map("date_last_checked")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  digitalPresence     DigitalPresence?
+  contacts            Contact[]
+  opportunityAnalysis OpportunityAnalysis?
+  outreach            Outreach[]
+
+  @@index([normalizedName], map: "idx_businesses_normalized_name")
+  @@index([barangay], map: "idx_businesses_barangay")
+  @@index([businessCategory], map: "idx_businesses_category")
+  @@map("businesses")
+}
+
+model DigitalPresence {
+  id                 String        @id @default(uuid()) @db.Uuid
+  businessId         String        @unique @map("business_id") @db.Uuid
+  websiteUrl         String?       @map("website_url")
+  websiteStatus      WebsiteStatus @default(NO_WEBSITE) @map("website_status")
+  httpStatusCode     Int?          @map("http_status_code")
+  hasSsl             Boolean       @default(false) @map("has_ssl")
+  isMobileResponsive Boolean       @default(false) @map("is_mobile_responsive")
+  facebookUrl        String?       @map("facebook_url")
+  instagramUrl       String?       @map("instagram_url")
+  hasOnlineBooking   Boolean       @default(false) @map("has_online_booking")
+  hasEcommerce       Boolean       @default(false) @map("has_ecommerce")
+  detectedTechnologies Json        @default("[]") @map("detected_technologies")
+  rawAuditData       Json          @default("{}") @map("raw_audit_data")
+  auditedAt          DateTime      @default(now()) @map("audited_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("digital_presence")
+}
+
+model Contact {
+  id                 String      @id @default(uuid()) @db.Uuid
+  businessId         String      @map("business_id") @db.Uuid
+  contactType        ContactType @map("contact_type")
+  contactValue       String      @map("contact_value")
+  sourceUrl          String?     @map("source_url")
+  verificationStatus String      @default("UNVERIFIED") @map("verification_status")
+  doNotContact       Boolean     @default(false) @map("do_not_contact")
+  lastVerified       DateTime?   @map("last_verified")
+  createdAt          DateTime    @default(now()) @map("created_at")
+
+  business Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  outreach Outreach[]
+
+  @@index([contactValue], map: "idx_contacts_value")
+  @@map("contacts")
+}
+
+model OpportunityAnalysis {
+  id                  String   @id @default(uuid()) @db.Uuid
+  businessId          String   @unique @map("business_id") @db.Uuid
+  primaryProblem      String   @map("primary_problem")
+  recommendedService  String   @map("recommended_service")
+  opportunitySummary  String   @map("opportunity_summary")
+  recommendedOffer    String   @map("recommended_offer")
+  leadScore           Int      @map("lead_score")
+  confidenceScore     Decimal  @map("confidence_score") @db.Decimal(3, 2)
+  aiModel             String   @map("ai_model")
+  analysisRawJson     Json     @map("analysis_raw_json")
+  analyzedAt          DateTime @default(now()) @map("analyzed_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@map("opportunity_analysis")
+}
+
+model Outreach {
+  id              String         @id @default(uuid()) @db.Uuid
+  businessId      String         @map("business_id") @db.Uuid
+  contactId       String?        @map("contact_id") @db.Uuid
+  channel         String         @default("EMAIL")
+  subject         String
+  messageBody     String         @map("message_body")
+  status          OutreachStatus @default(PENDING_APPROVAL)
+  approvedBy      String?        @map("approved_by")
+  approvedAt      DateTime?      @map("approved_at")
+  rejectionReason String?        @map("rejection_reason")
+  sentAt          DateTime?      @map("sent_at")
+  resendMessageId String?        @map("resend_message_id")
+  repliedAt       DateTime?      @map("replied_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  business  Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  contact   Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  followups Followup[]
+
+  @@index([status], map: "idx_outreach_status")
+  @@map("outreach")
+}
+
+model Followup {
+  id          String   @id @default(uuid()) @db.Uuid
+  outreachId  String   @map("outreach_id") @db.Uuid
+  stepNumber  Int      @map("step_number")
+  scheduledAt DateTime @map("scheduled_at")
+  status      String   @default("SCHEDULED")
+  subject     String
+  messageBody String   @map("message_body")
+  sentAt      DateTime? @map("sent_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  outreach Outreach @relation(fields: [outreachId], references: [id], onDelete: Cascade)
+
+  @@map("followups")
+}
+
+model SuppressionList {
+  id           String   @id @default(uuid()) @db.Uuid
+  contactValue String   @unique @map("contact_value")
+  reason       String
+  source       String   @default("USER_OPT_OUT")
+  dateAdded    DateTime @default(now()) @map("date_added")
+
+  @@index([contactValue], map: "idx_suppression_value")
+  @@map("suppression_list")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  action       String
+  actor        String
+  targetEntity String   @map("target_entity")
+  targetId     String?  @map("target_id") @db.Uuid
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
