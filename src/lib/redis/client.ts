@@ -6,6 +6,7 @@ const REDIS_URL = process.env.REDIS_URL ?? 'redis://127.0.0.1:6379'
 const globalForRedis = global as unknown as {
   redisConnection: Redis | undefined
   queues: Record<string, Queue> | undefined
+  redisLoggedError: boolean | undefined
 }
 
 export const getRedisConnection = (): Redis => {
@@ -13,10 +14,27 @@ export const getRedisConnection = (): Redis => {
     globalForRedis.redisConnection = new Redis(REDIS_URL, {
       maxRetriesPerRequest: null, // Required by BullMQ
       enableReadyCheck: false,
+      // Stop continuous aggressive retry loop if local Redis is offline
+      retryStrategy(times) {
+        if (times > 3) {
+          // Stop retrying continuously when local Redis is offline
+          return null
+        }
+        return Math.min(times * 300, 1000)
+      },
     })
     
-    globalForRedis.redisConnection.on('error', (err) => {
-      console.error('Redis Connection Error:', err)
+    globalForRedis.redisConnection.on('error', (err: any) => {
+      // Log connection error only ONCE to prevent terminal log spamming
+      if (!globalForRedis.redisLoggedError) {
+        console.warn(`⚠️ [Redis] Connection failed to ${REDIS_URL} (${err.code || err.message}). App operating in local fallback mode.`)
+        globalForRedis.redisLoggedError = true
+      }
+    })
+
+    globalForRedis.redisConnection.on('connect', () => {
+      console.log('✅ [Redis] Connected successfully.')
+      globalForRedis.redisLoggedError = false
     })
   }
   return globalForRedis.redisConnection

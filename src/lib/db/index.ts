@@ -5,10 +5,29 @@ import pg from 'pg'
 const globalForPrisma = global as unknown as { prisma: PrismaClient | undefined }
 
 const getDbClient = () => {
-  const connectionString = process.env.DATABASE_URL
+  let connectionString = process.env.DATABASE_URL
   if (!connectionString) {
     throw new Error('DATABASE_URL is not set in environment variables.')
   }
+
+  // If it's a prisma+postgres protocol, extract the underlying postgres:// URL from the api_key parameter
+  if (connectionString.startsWith('prisma+postgres://')) {
+    try {
+      const url = new URL(connectionString)
+      const apiKey = url.searchParams.get('api_key')
+      if (apiKey) {
+        // Base64 decode the api_key to find the databaseUrl JSON
+        const decoded = Buffer.from(apiKey, 'base64').toString('utf-8')
+        const parsed = JSON.parse(decoded)
+        if (parsed.databaseUrl) {
+          connectionString = parsed.databaseUrl
+        }
+      }
+    } catch (err: any) {
+      console.warn('Failed to parse prisma+postgres URL, using original:', err.message)
+    }
+  }
+
   const pool = new pg.Pool({
     connectionString,
     max: 10,

@@ -57,7 +57,7 @@ export function jaroWinklerDistance(s1: string, s2: string): number {
 
 interface DuplicateCheckInput {
   name: string
-  barangay: string
+  barangay?: string
   phone?: string
   websiteUrl?: string
 }
@@ -125,10 +125,18 @@ export async function findDuplicateBusiness(input: DuplicateCheckInput): Promise
 
   // 3. Check by Fuzzy Name Match within the same Barangay
   const incomingNormalized = normalizeBusinessName(input.name)
+  const barangay = input.barangay?.trim()
+
+  // Website and phone checks above are still valid without a barangay. A fuzzy
+  // name comparison is not safe across an entire city, so skip it here.
+  if (!barangay) {
+    return { isDuplicate: false }
+  }
+
   const existingBusinesses = await prisma.business.findMany({
     where: {
       barangay: {
-        equals: input.barangay,
+        equals: barangay,
         mode: 'insensitive',
       },
     },
@@ -144,7 +152,7 @@ export async function findDuplicateBusiness(input: DuplicateCheckInput): Promise
       return {
         isDuplicate: true,
         matchedBusinessId: existing.id,
-        reason: `Fuzzy business name match in ${input.barangay} (${Math.round(similarity * 100)}% similarity)`,
+        reason: `Fuzzy business name match in ${barangay} (${Math.round(similarity * 100)}% similarity)`,
       }
     }
   }

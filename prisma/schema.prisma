@@ -61,6 +61,7 @@ model Business {
   sourceUrl        String?         @map("source_url")
   dateDiscovered   DateTime        @default(now()) @map("date_discovered")
   dateLastChecked  DateTime        @default(now()) @map("date_last_checked")
+  notes            String?         @default("")
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
 

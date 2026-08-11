@@ -1,4 +1,19 @@
 import axios from 'axios'
+import type { BusinessCategory } from '../lib/constants/business-categories'
+import { getErrorMessage } from '../lib/utils/errors'
+
+interface OverpassElement {
+  id: number
+  type: 'node' | 'way' | 'relation'
+  lat?: number
+  lon?: number
+  center?: { lat: number; lon: number }
+  tags?: Record<string, string>
+}
+
+interface OverpassResponse {
+  elements: OverpassElement[]
+}
 
 export interface DiscoveredBusiness {
   name: string
@@ -17,43 +32,68 @@ export interface DiscoveredBusiness {
 }
 
 // Maps our standard category names to OSM amenity/shop key-values
-const CATEGORY_MAP: Record<string, { key: string; values: string[] }> = {
-  'Restaurant': { key: 'amenity', values: ['restaurant', 'cafe', 'fast_food', 'food_court'] },
-  'Dental Clinic': { key: 'amenity', values: ['dentist'] },
-  'Medical Clinic': { key: 'amenity', values: ['clinic', 'doctors', 'hospital'] },
-  'Salon': { key: 'shop', values: ['hairdresser', 'beauty', 'barber'] },
-  'Gym': { key: 'leisure', values: ['fitness_centre', 'sports_centre'] },
+const CATEGORY_MAP: Record<BusinessCategory, { tags: { key: string; values: string[] }[] }> = {
+  'Dental Clinic': { tags: [{ key: 'amenity', values: ['dentist'] }] },
+  'Medical Clinic': { tags: [{ key: 'amenity', values: ['clinic', 'doctors', 'hospital'] }] },
+  'Coffee Shop': { tags: [{ key: 'amenity', values: ['cafe'] }] },
+  'Hardware Store': { tags: [{ key: 'shop', values: ['hardware', 'doityourself', 'trade'] }] },
+  'Restaurant': { tags: [{ key: 'amenity', values: ['restaurant', 'fast_food', 'food_court'] }] },
+  'Auto Repair': { tags: [{ key: 'shop', values: ['car_repair', 'car_parts', 'tyres'] }] },
+  'Salon': { tags: [{ key: 'shop', values: ['hairdresser', 'beauty', 'barber'] }] },
+  'Gym / Fitness': { tags: [{ key: 'leisure', values: ['fitness_centre', 'sports_centre'] }] },
+  'Veterinary Clinic': { tags: [{ key: 'amenity', values: ['veterinary'] }] },
+  'Accounting Office': { tags: [{ key: 'office', values: ['accountant'] }] },
+  'Law Office': { tags: [{ key: 'office', values: ['lawyer'] }] },
+  'Massage / Spa': {
+    tags: [
+      { key: 'shop', values: ['massage'] },
+      { key: 'leisure', values: ['spa'] },
+    ],
+  },
+}
+
+// Maps standard city names to OSM area names and provinces
+export const CITY_OSM_MAP: Record<string, { osmName: string; province: string }> = {
+  'Cebu City': { osmName: 'Cebu City', province: 'Cebu' },
+  'Naga City': { osmName: 'City of Naga', province: 'Cebu' },
+  'Merida': { osmName: 'Merida', province: 'Leyte' },
+  'Ormoc City': { osmName: 'Ormoc', province: 'Leyte' },
+  'Mandaue City': { osmName: 'Mandaue', province: 'Cebu' },
+  'Lapu-Lapu City': { osmName: 'Lapu-Lapu', province: 'Cebu' },
+  'Talisay City': { osmName: 'Talisay', province: 'Cebu' },
 }
 
 export class DiscoveryService {
-  private static OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+  private static OVERPASS_ENDPOINTS = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.private.coffee/api/interpreter',
+  ]
 
   /**
-   * Generates the Overpass QL query for a specific Category and Barangay in Cebu City
+   * Generates the Overpass QL query for a specific Category, Barangay, and City
    */
-  private static buildOverpassQuery(category: string, barangay: string): string {
-    const config = CATEGORY_MAP[category]
+  private static buildOverpassQuery(category: string, barangay: string | undefined, city: string): string {
+    const config = CATEGORY_MAP[category as BusinessCategory]
     if (!config) {
       throw new Error(`Category "${category}" is not configured for OpenStreetMap discovery.`)
     }
 
-    const { key, values } = config
-    const unionBlocks = values
-      .map((val) => {
-        // Query elements with the key=value inside Cebu City, matching the specific suburb (barangay)
+    const cityConfig = CITY_OSM_MAP[city] || { osmName: city, province: 'Cebu' }
+    const osmAreaName = cityConfig.osmName
+
+    const unionBlocks = config.tags
+      .flatMap(({ key, values }) => values.map((val) => {
         return `
-          node["${key}"="${val}"]["addr:suburb"~"${barangay}",i](area.cebu);
-          way["${key}"="${val}"]["addr:suburb"~"${barangay}",i](area.cebu);
-          // Fallback: also query elements within the bounding box of Cebu and filter by address or proximity later if suburb is blank
-          node["${key}"="${val}"](area.cebu);
-          way["${key}"="${val}"](area.cebu);
+          node["${key}"="${val}"](area.searchArea);
+          way["${key}"="${val}"](area.searchArea);
         `
-      })
+      }))
       .join('\n')
 
     return `
-      [out:json][timeout:60];
-      area[name="Cebu City"]->.cebu;
+      [out:json][timeout:25];
+      area[name="${osmAreaName}"]->.searchArea;
       (
         ${unionBlocks}
       );
@@ -64,24 +104,74 @@ export class DiscoveryService {
   /**
    * Fetches businesses from OpenStreetMap using the Overpass API
    */
-  public static async discoverFromOSM(category: string, barangay: string): Promise<DiscoveredBusiness[]> {
-    const query = this.buildOverpassQuery(category, barangay)
+  public static async discoverFromOSM(
+    category: string,
+    barangay?: string,
+    city: string = 'Cebu City'
+  ): Promise<DiscoveredBusiness[]> {
+    const cityConfig = CITY_OSM_MAP[city] || { osmName: city, province: 'Cebu' }
+    const province = cityConfig.province
+
+    const query = this.buildOverpassQuery(category, barangay, city)
     
-    try {
-      const response = await axios.post(
-        this.OVERPASS_URL,
-        `data=${encodeURIComponent(query)}`,
-        {
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          timeout: 45000,
+    let lastError: unknown = null
+    let responseData: OverpassResponse | null = null
+
+    // Try primary endpoint and mirrors with appropriate User-Agent headers
+    for (const endpoint of this.OVERPASS_ENDPOINTS) {
+      try {
+        // Overpass API prefers GET requests with data parameter
+        const getUrl = `${endpoint}?data=${encodeURIComponent(query)}`
+        const res = await axios.get<OverpassResponse>(getUrl, {
+          headers: {
+            'User-Agent': 'CebuDigitalFinderBot/1.0 (https://cebudigitalfinder.com)',
+            'Accept': 'application/json',
+          },
+          timeout: 30000,
+        })
+
+        if (res.data && res.data.elements) {
+          responseData = res.data
+          break
         }
-      )
+      } catch (err: unknown) {
+        console.warn(`Overpass endpoint GET warning (${endpoint}): ${getErrorMessage(err)}`)
+        lastError = err
 
-      if (!response.data || !response.data.elements) {
-        return []
+        // Fallback try POST request for this endpoint
+        try {
+          const res = await axios.post<OverpassResponse>(
+            endpoint,
+            `data=${encodeURIComponent(query)}`,
+            {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'CebuDigitalFinderBot/1.0 (https://cebudigitalfinder.com)',
+                'Accept': 'application/json',
+              },
+              timeout: 30000,
+            }
+          )
+
+          if (res.data && res.data.elements) {
+            responseData = res.data
+            break
+          }
+        } catch (postErr: unknown) {
+          console.warn(`Overpass endpoint POST warning (${endpoint}): ${getErrorMessage(postErr)}`)
+          lastError = postErr
+        }
       }
+    }
 
-      const elements = response.data.elements
+    if (!responseData || !responseData.elements) {
+      if (lastError) {
+        console.error(`Overpass API Error for Category: ${category}, City: ${city}, Barangay: ${barangay}:`, getErrorMessage(lastError))
+      }
+      return []
+    }
+
+      const elements = responseData.elements
       const results: DiscoveredBusiness[] = []
 
       for (const element of elements) {
@@ -100,12 +190,10 @@ export class DiscoveryService {
           lon = element.center.lon
         }
 
-        // Suburb validation: Since we fetched elements in Cebu City, check if suburb tag matches
-        // or matches barangay name in address field.
+        // Suburb validation: if a specific barangay was searched, filter elements that don't match
         const tagSuburb = tags['addr:suburb'] || tags['addr:neighborhood'] || ''
         const tagStreet = tags['addr:street'] || ''
         
-        // Skip if a specific barangay was requested, the element has a suburb tag, and it doesn't match
         if (
           barangay &&
           tagSuburb &&
@@ -122,9 +210,9 @@ export class DiscoveryService {
           name,
           businessCategory: category,
           description: tags.description || tags.note || undefined,
-          barangay: tagSuburb || barangay, // Fallback to searched barangay
-          city: tags['addr:city'] || 'Cebu City',
-          province: tags['addr:province'] || 'Cebu',
+          barangay: tagSuburb || barangay || 'City-wide',
+          city: tags['addr:city'] || city,
+          province: tags['addr:province'] || province,
           latitude: lat,
           longitude: lon,
           discoverySource: 'OSM_OVERPASS',
@@ -136,9 +224,5 @@ export class DiscoveryService {
       }
 
       return results
-    } catch (error: any) {
-      console.error(`Overpass API Error for Category: ${category}, Barangay: ${barangay}:`, error.message)
-      throw error
-    }
   }
 }

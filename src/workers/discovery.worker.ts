@@ -4,22 +4,23 @@ import { DiscoveryService, DiscoveredBusiness } from '../services/discovery.serv
 import { SearchService } from '../services/search.service'
 import { IngestionService } from '../services/ingestion.service'
 import { normalizeBusinessName } from '../lib/utils/text-normalizer'
+import { getErrorMessage } from '../lib/utils/errors'
 
 const connection = getRedisConnection()
 
 export const discoveryWorker = new Worker(
   'discovery-queue',
   async (job) => {
-    const { category, barangay } = job.data
-    console.log(`[Discovery Worker] Starting search for Category: "${category}" in Barangay: "${barangay}"`)
+    const { category, barangay, city } = job.data
+    console.log(`[Discovery Worker] Starting search for Category: "${category}" in City: "${city || 'Cebu City'}" (Barangay: "${barangay || 'All'}")`)
 
     try {
       // 1. Run OSM Overpass search
-      const osmLeads = await DiscoveryService.discoverFromOSM(category, barangay)
+      const osmLeads = await DiscoveryService.discoverFromOSM(category, barangay, city)
       console.log(`[Discovery Worker] OSM returned ${osmLeads.length} raw leads.`)
 
       // 2. Run Google Custom Search fallback
-      const searchLeads = await SearchService.searchGoogle(category, barangay)
+      const searchLeads = await SearchService.searchGoogle(category, barangay, city)
       console.log(`[Discovery Worker] Search Engine API returned ${searchLeads.length} raw leads.`)
 
       // 3. Simple In-Memory Merge by normalized name
@@ -57,8 +58,8 @@ export const discoveryWorker = new Worker(
       console.log(`[Discovery Worker] Ingestion finished. Added: ${stats.added}, Updated: ${stats.updated}, Suppressed: ${stats.duplicatesSkipped}`)
       
       return stats
-    } catch (err: any) {
-      console.error(`[Discovery Worker] Error executing discovery for "${category}" in "${barangay}":`, err.message)
+    } catch (err: unknown) {
+      console.error(`[Discovery Worker] Error executing discovery for "${category}" in "${barangay}":`, getErrorMessage(err))
       throw err
     }
   },

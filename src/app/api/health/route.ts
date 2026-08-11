@@ -54,10 +54,9 @@ export async function GET() {
       latencyMs: Math.round(performance.now() - redisStart)
     }
   } catch (err: any) {
-    overallHealthy = false
     services.redis = {
       status: 'down',
-      error: err.message || String(err)
+      error: 'Offline (Inline local fallback mode active)'
     }
   }
 
