@@ -6,7 +6,8 @@
     "db:start": "prisma dev --name cebu-digital-finder --detach",
     "predev": "npm run db:start && prisma migrate deploy",
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint"
   },
