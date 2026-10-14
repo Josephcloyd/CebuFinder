@@ -9,6 +9,7 @@ interface ExportLeadsButtonProps {
   barangay?: string
   category?: string
   status?: string
+  onlyWithEmail?: boolean
 }
 
 export function ExportLeadsButton({
@@ -17,6 +18,7 @@ export function ExportLeadsButton({
   barangay,
   category,
   status,
+  onlyWithEmail: onlyWithEmailView = false,
 }: ExportLeadsButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
@@ -44,7 +46,7 @@ export function ExportLeadsButton({
     if (filterStatus || (status && status !== 'ALL')) {
       params.append('status', filterStatus || status || '')
     }
-    if (onlyWithEmail) params.append('onlyWithEmail', 'true')
+    if (onlyWithEmail || onlyWithEmailView) params.append('onlyWithEmail', 'true')
 
     const downloadUrl = `/api/v1/leads/export?${params.toString()}`
 
@@ -64,7 +66,7 @@ export function ExportLeadsButton({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isExporting}
-        className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all cursor-pointer disabled:opacity-50"
+        className="flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
       >
         <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-100" />
         <span>{isExporting ? 'Preparing CSV...' : 'Download CSV'}</span>
@@ -72,33 +74,33 @@ export function ExportLeadsButton({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-zinc-950 border border-zinc-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in p-1.5 space-y-1">
-          <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 border-b border-zinc-900 mb-1">
+        <div className="absolute right-0 mt-2 w-64 bg-background border border-border rounded-xl shadow-2xl z-50 overflow-hidden animate-fade-in p-1.5 space-y-1">
+          <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border mb-1">
             CSV Export Formats
           </div>
 
           <button
             onClick={() => triggerExport(false)}
-            className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-zinc-200 hover:bg-zinc-900 hover:text-white flex items-center gap-2 transition-colors"
+            className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-foreground hover:bg-card hover:text-foreground flex items-center gap-2 transition-colors"
           >
             <Download className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Export Current Leads (CSV)</span>
+            <span>Export Current Businesses (CSV)</span>
           </button>
 
           <button
             onClick={() => triggerExport(true)}
-            className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-zinc-200 hover:bg-zinc-900 hover:text-white flex items-center gap-2 transition-colors"
+            className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-foreground hover:bg-card hover:text-foreground flex items-center gap-2 transition-colors"
           >
             <Mail className="w-3.5 h-3.5 text-blue-400" />
-            <span>Export Email Contacts Only</span>
+            <span>Export Businesses with Email</span>
           </button>
 
           <button
             onClick={() => triggerExport(false, 'NO_WEBSITE')}
-            className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-zinc-200 hover:bg-zinc-900 hover:text-white flex items-center gap-2 transition-colors"
+            className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-foreground hover:bg-card hover:text-foreground flex items-center gap-2 transition-colors"
           >
             <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
-            <span>Export No Website Leads Only</span>
+            <span>Export No Website Businesses</span>
           </button>
         </div>
       )}

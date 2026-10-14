@@ -36,6 +36,48 @@ export async function GET(
   }
 }
 
+// PATCH /api/v1/leads/[id] — Update editable business facts.
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const body = await request.json()
+    const establishedYear = body.establishedYear === null || body.establishedYear === ''
+      ? null
+      : Number(body.establishedYear)
+    const currentYear = new Date().getFullYear()
+
+    if (establishedYear !== null && (!Number.isInteger(establishedYear) || establishedYear < 1800 || establishedYear > currentYear)) {
+      return NextResponse.json({ success: false, error: `Established year must be between 1800 and ${currentYear}` }, { status: 400 })
+    }
+
+    const business = await prisma.business.update({
+      where: { id },
+      data: {
+        establishedYear,
+        establishedYearSource: establishedYear ? 'Manually confirmed' : null,
+      },
+    })
+
+    await prisma.auditLog.create({
+      data: {
+        action: 'BUSINESS_ESTABLISHED_YEAR_UPDATED',
+        actor: 'USER',
+        targetEntity: 'businesses',
+        targetId: id,
+        metadata: { establishedYear },
+      },
+    })
+
+    return NextResponse.json({ success: true, business })
+  } catch (error: any) {
+    console.error('Lead update error:', error.message)
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+  }
+}
+
 // DELETE /api/v1/leads/[id] — Delete business and all related data
 export async function DELETE(
   request: NextRequest,

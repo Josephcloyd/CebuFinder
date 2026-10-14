@@ -73,11 +73,11 @@ export function CebuMap({ leads, onSelectLead, height = '100%', viewMode = 'pins
     // Zoom controls top-right
     L.control.zoom({ position: 'topright' }).addTo(map)
 
-    // CartoDB Dark Matter tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+    // OpenStreetMap's standard tiles do not require a provider API key.
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
-      subdomains: 'abcd',
+      crossOrigin: true,
     }).addTo(map)
 
     mapInstanceRef.current = map
@@ -193,7 +193,7 @@ export function CebuMap({ leads, onSelectLead, height = '100%', viewMode = 'pins
             background: ${color.bg};
             border: 2.5px solid ${color.border};
             border-radius: 50%;
-            box-shadow: 0 0 0 4px ${color.bg}22, 0 0 18px ${color.shadow}, 0 4px 12px rgba(0,0,0,0.6);
+            box-shadow: 0 0 0 3px ${color.bg}22, 0 2px 7px rgba(37,42,44,0.28);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -214,20 +214,20 @@ export function CebuMap({ leads, onSelectLead, height = '100%', viewMode = 'pins
       marker.bindTooltip(`
         <div style="
           font-family: system-ui, sans-serif;
-          background: #09090b;
-          color: #fff;
+          background: #fcfbf8;
+          color: #252a2c;
           padding: 10px 14px;
           border-radius: 10px;
-          border: 1px solid #27272a;
+          border: 1px solid #e5e2db;
           min-width: 180px;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+          box-shadow: 0 8px 24px rgba(37,42,44,0.14);
           pointer-events: none;
         ">
           <div style="font-size: 11px; font-weight: 800; color: ${color.bg}; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">${color.text}</div>
-          <div style="font-size: 13px; font-weight: 800; color: #fff; margin-bottom: 2px;">${lead.name}</div>
-          <div style="font-size: 10px; color: #71717a;">📍 ${lead.barangay}, ${lead.city}</div>
-          <div style="font-size: 10px; color: #a1a1aa; margin-top: 6px; padding-top: 6px; border-top: 1px solid #27272a;">
-            Score: <strong style="color: #a78bfa;">${lead.leadScore}/100</strong> &nbsp;•&nbsp; Click to view details
+          <div style="font-size: 13px; font-weight: 700; color: #252a2c; margin-bottom: 2px;">${lead.name}</div>
+          <div style="font-size: 10px; color: #727775;">${lead.barangay}, ${lead.city}</div>
+          <div style="font-size: 10px; color: #727775; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e5e2db;">
+            Score: <strong style="color: #42685a;">${lead.leadScore}/100</strong> &nbsp;•&nbsp; Click to view details
           </div>
         </div>
       `, {
@@ -310,29 +310,29 @@ export function CebuMap({ leads, onSelectLead, height = '100%', viewMode = 'pins
           padding: 0 !important;
         }
         .leaflet-container {
-          background: #09090b;
+          background: #e9e6de;
         }
       `}</style>
-      <div ref={mapContainerRef} className="w-full h-full z-0 rounded-2xl" />
+      <div ref={mapContainerRef} className="w-full h-full z-0 rounded-xl" />
 
       {/* Map Legend Overlay */}
-      <div className="absolute bottom-6 left-6 z-[1000] bg-zinc-950/95 backdrop-blur-xl p-4 rounded-2xl border border-zinc-800/80 shadow-2xl">
-        <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500 block mb-2.5">Digital Gap Status</span>
+      <div className="absolute bottom-4 left-4 z-[1000] hidden rounded-lg border border-border bg-card/95 p-3 shadow-sm backdrop-blur-md sm:block">
+        <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground block mb-2.5">Digital Gap Status</span>
         <div className="space-y-2">
           <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-red-500 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(239,68,68,0.7)' }} />
-            <span className="text-[11px] text-zinc-300 font-semibold">No Website / Broken</span>
+            <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-red-500" />
+            <span className="text-[11px] text-foreground font-semibold">No Website / Broken</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-amber-500 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(245,158,11,0.7)' }} />
-            <span className="text-[11px] text-zinc-300 font-semibold">Facebook Only / Outdated</span>
+            <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-amber-500" />
+            <span className="text-[11px] text-foreground font-semibold">Facebook Only / Outdated</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 flex-shrink-0" style={{ boxShadow: '0 0 8px rgba(16,185,129,0.7)' }} />
-            <span className="text-[11px] text-zinc-300 font-semibold">Functional Website</span>
+            <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-emerald-500" />
+            <span className="text-[11px] text-foreground font-semibold">Functional Website</span>
           </div>
-          <div className="pt-2 border-t border-zinc-800 mt-1">
-            <span className="text-[9px] text-zinc-600">Larger pin = higher opportunity score</span>
+          <div className="pt-2 border-t border-border mt-1">
+            <span className="text-[9px] text-muted-foreground">Larger pin = higher opportunity score</span>
           </div>
         </div>
       </div>

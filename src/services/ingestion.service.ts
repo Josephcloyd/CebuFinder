@@ -50,10 +50,23 @@ export class IngestionService {
         })
 
         if (dupResult.isDuplicate && dupResult.matchedBusinessId) {
+          const existingBusiness = await prisma.business.findUnique({
+            where: { id: dupResult.matchedBusinessId },
+            select: { establishedYear: true },
+          })
+
           // Update the last checked timestamp for the existing business
           await prisma.business.update({
             where: { id: dupResult.matchedBusinessId },
-            data: { dateLastChecked: new Date() },
+            data: {
+              dateLastChecked: new Date(),
+              ...(!existingBusiness?.establishedYear && rawBusiness.establishedYear
+                ? {
+                    establishedYear: rawBusiness.establishedYear,
+                    establishedYearSource: rawBusiness.establishedYearSource,
+                  }
+                : {}),
+            },
           })
 
           // Check if we discovered new contact info for this existing business
@@ -110,6 +123,8 @@ export class IngestionService {
             longitude: rawBusiness.longitude,
             discoverySource: rawBusiness.discoverySource,
             sourceUrl: rawBusiness.sourceUrl,
+            establishedYear: rawBusiness.establishedYear,
+            establishedYearSource: rawBusiness.establishedYearSource,
           },
         })
 

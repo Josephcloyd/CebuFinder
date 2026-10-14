@@ -13,23 +13,23 @@ interface TimelineEvent {
 }
 
 const colorMap: Record<string, string> = {
-  purple: 'border-purple-500/40 bg-purple-500/10',
+  purple: 'border-primary/50 bg-primary/10',
   blue: 'border-blue-500/40 bg-blue-500/10',
-  indigo: 'border-indigo-500/40 bg-indigo-500/10',
+  indigo: 'border-primary/40 bg-primary/10',
   emerald: 'border-emerald-500/40 bg-emerald-500/10',
   green: 'border-green-500/40 bg-green-500/10',
   amber: 'border-amber-500/40 bg-amber-500/10',
-  zinc: 'border-zinc-700/60 bg-zinc-800/40',
+  zinc: 'border-border/60 bg-secondary',
 }
 
 const lineColorMap: Record<string, string> = {
-  purple: 'bg-purple-500/30',
+  purple: 'bg-primary/15',
   blue: 'bg-blue-500/30',
-  indigo: 'bg-indigo-500/30',
+  indigo: 'bg-primary/30',
   emerald: 'bg-emerald-500/30',
   green: 'bg-green-500/30',
   amber: 'bg-amber-500/30',
-  zinc: 'bg-zinc-700/50',
+  zinc: 'bg-muted-foreground/30',
 }
 
 function formatRelative(dateStr: string): string {
@@ -68,7 +68,7 @@ export function BusinessTimeline({ businessId }: { businessId: string }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-10">
-        <Loader2 className="w-5 h-5 animate-spin text-purple-400" />
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
       </div>
     )
   }
@@ -76,8 +76,8 @@ export function BusinessTimeline({ businessId }: { businessId: string }) {
   if (events.length === 0) {
     return (
       <div className="py-10 text-center">
-        <Clock className="w-8 h-8 text-zinc-700 mx-auto mb-2" />
-        <p className="text-sm text-zinc-500">No activity recorded yet</p>
+        <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+        <p className="text-sm text-muted-foreground">No activity recorded yet</p>
       </div>
     )
   }
@@ -98,8 +98,8 @@ export function BusinessTimeline({ businessId }: { businessId: string }) {
 
           {/* Content */}
           <div className="flex-1 pb-6">
-            <p className="text-sm text-zinc-200 font-semibold leading-snug">{event.label}</p>
-            <p className="text-[11px] text-zinc-500 mt-0.5">{formatRelative(event.timestamp)}</p>
+            <p className="text-sm text-foreground font-semibold leading-snug">{event.label}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{formatRelative(event.timestamp)}</p>
           </div>
         </div>
       ))}

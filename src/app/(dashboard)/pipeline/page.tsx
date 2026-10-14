@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Columns, RefreshCw, Search, Sparkles, MoveRight, CheckCircle, ShieldAlert, ArrowRight, UserCheck } from 'lucide-react'
+import { RefreshCw, Search, Sparkles, MoveRight, CheckCircle, ShieldAlert, ArrowRight, UserCheck } from 'lucide-react'
 import { PitchGeneratorModal } from '../../../components/pitch-generator-modal'
 import { BUSINESS_CATEGORIES } from '../../../lib/constants/business-categories'
 
@@ -76,7 +76,7 @@ export default function KanbanPipelinePage() {
 
   const columnsConfig = [
     { key: 'DISCOVERED', title: 'Discovered', icon: Search, color: 'border-blue-500/40 text-blue-400 bg-blue-500/10' },
-    { key: 'AUDITED', title: 'Audited', icon: ShieldAlert, color: 'border-purple-500/40 text-purple-400 bg-purple-500/10' },
+    { key: 'AUDITED', title: 'Audited', icon: ShieldAlert, color: 'border-primary/50 text-primary bg-primary/10' },
     { key: 'PITCH_DRAFTED', title: 'Pitch Drafted', icon: Sparkles, color: 'border-amber-500/40 text-amber-400 bg-amber-500/10' },
     { key: 'CONTACTED', title: 'Contacted', icon: ArrowRight, color: 'border-teal-500/40 text-teal-400 bg-teal-500/10' },
     { key: 'CONVERTED', title: 'Converted / Won', icon: CheckCircle, color: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10' },
@@ -91,24 +91,18 @@ export default function KanbanPipelinePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between animate-slide-up">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <Columns className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-black gradient-text">Kanban CRM Pipeline</h2>
-            <p className="text-sm text-zinc-500 mt-0.5">
-              Drag-and-drop lead lifecycle management from discovery to conversion.
-            </p>
-          </div>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="mb-2 text-sm font-medium text-primary">Opportunity tracking</p>
+          <h1 className="text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-3xl">Sales pipeline</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Move leads from discovery through qualification, outreach, and conversion.</p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={fetchPipeline}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-semibold transition-all hover:bg-zinc-800 disabled:opacity-50"
+            className="flex h-9 items-center gap-2 rounded-lg border border-border bg-card px-3 text-xs font-medium text-foreground transition-colors hover:bg-secondary disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh Board
@@ -117,14 +111,14 @@ export default function KanbanPipelinePage() {
       </div>
 
       {/* Filter Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-4 rounded-xl glass-card">
+      <div className="grid grid-cols-1 gap-3 rounded-xl border border-border bg-card p-4 md:grid-cols-3">
         <div>
           <input
             type="text"
             placeholder="Search business name..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:border-purple-500/50"
+            className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -132,7 +126,7 @@ export default function KanbanPipelinePage() {
           <select
             value={barangay}
             onChange={(e) => setBarangay(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500/50"
+            className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
           >
             <option value="ALL">All Barangays</option>
             <option value="Lahug">Lahug</option>
@@ -148,7 +142,7 @@ export default function KanbanPipelinePage() {
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500/50"
+            className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary"
           >
             <option value="ALL">All Categories</option>
             {BUSINESS_CATEGORIES.map((businessCategory) => (
@@ -165,14 +159,14 @@ export default function KanbanPipelinePage() {
           const Icon = col.icon
 
           return (
-            <div key={col.key} className="flex flex-col rounded-2xl bg-zinc-950/80 border border-zinc-900/80 p-3 min-w-[240px] min-h-[650px]">
+            <div key={col.key} className="flex flex-col rounded-xl bg-background border border-border/80 p-3 min-w-[240px] min-h-[650px]">
               {/* Column Header */}
-              <div className="flex items-center justify-between p-2.5 mb-3 border-b border-zinc-900">
+              <div className="flex items-center justify-between p-2.5 mb-3 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <Icon className="w-4 h-4 text-zinc-400" />
-                  <span className="text-xs font-bold text-white">{col.title}</span>
+                  <Icon className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-xs font-bold text-foreground">{col.title}</span>
                 </div>
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${col.color}`}>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${col.color}`}>
                   {leadsList.length}
                 </span>
               </div>
@@ -182,39 +176,39 @@ export default function KanbanPipelinePage() {
                 {leadsList.map((lead: any) => (
                   <div
                     key={lead.id}
-                    className="p-3.5 rounded-xl bg-zinc-900/50 border border-zinc-800/60 hover:border-purple-500/40 transition-all space-y-3 group"
+                    className="p-3.5 rounded-xl bg-secondary border border-border hover:border-primary/50 transition-all space-y-3 group"
                   >
                     {/* Header: Name & Score */}
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors line-clamp-1">
+                      <h4 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors line-clamp-1">
                         {lead.name}
                       </h4>
-                      <span className="text-[10px] font-black text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
                         {lead.leadScore}
                       </span>
                     </div>
 
                     {/* Metadata */}
-                    <div className="flex items-center justify-between text-[10px] text-zinc-500 font-semibold">
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground font-semibold">
                       <span>📍 {lead.barangay}</span>
                       <span>{getWebsiteBadge(lead.websiteStatus)}</span>
                     </div>
 
                     {/* Problem Summary */}
-                    <p className="text-[10px] text-zinc-400 line-clamp-2 bg-zinc-950/60 p-2 rounded-lg border border-zinc-800/40">
+                    <p className="text-[10px] text-muted-foreground line-clamp-2 bg-background/90 p-2 rounded-lg border border-border">
                       {lead.primaryProblem}
                     </p>
 
                     {/* Action Row */}
-                    <div className="flex items-center justify-between pt-1 border-t border-zinc-800/40">
+                    <div className="flex items-center justify-between pt-1 border-t border-border">
                       <button
                         onClick={() => {
                           setPitchModalLeadId(lead.id)
                           setPitchModalLeadName(lead.name)
                         }}
-                        className="text-[10px] font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1"
+                        className="text-[10px] font-bold text-primary hover:text-primary flex items-center gap-1"
                       >
-                        <Sparkles className="w-3 h-3 text-purple-400" />
+                        <Sparkles className="w-3 h-3 text-primary" />
                         AI Pitch
                       </button>
 
@@ -222,7 +216,7 @@ export default function KanbanPipelinePage() {
                       <select
                         value={col.key}
                         onChange={(e) => moveStage(lead.id, e.target.value)}
-                        className="bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-400 rounded px-1.5 py-0.5 focus:outline-none"
+                        className="bg-background border border-border text-[10px] text-muted-foreground rounded px-1.5 py-0.5 focus:outline-none"
                       >
                         <option value="DISCOVERED">Discovered</option>
                         <option value="AUDITED">Audited</option>
@@ -235,7 +229,7 @@ export default function KanbanPipelinePage() {
                 ))}
 
                 {leadsList.length === 0 && (
-                  <div className="h-32 flex flex-col items-center justify-center border border-dashed border-zinc-900 rounded-xl text-[11px] text-zinc-600 font-semibold">
+                  <div className="h-32 flex flex-col items-center justify-center border border-dashed border-border rounded-xl text-[11px] text-muted-foreground font-semibold">
                     No leads in {col.title}
                   </div>
                 )}

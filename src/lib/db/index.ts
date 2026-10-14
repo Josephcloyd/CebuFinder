@@ -5,9 +5,12 @@ import pg from 'pg'
 const globalForPrisma = global as unknown as { prisma: PrismaClient | undefined }
 
 const getDbClient = () => {
-  let connectionString = process.env.DATABASE_URL
+  // Prefer the developer-local database when configured. This lets local
+  // development keep working even if a previously provisioned cloud database
+  // has expired, while production continues to use DATABASE_URL.
+  let connectionString = process.env.LOCAL_DATABASE_URL ?? process.env.DATABASE_URL
   if (!connectionString) {
-    throw new Error('DATABASE_URL is not set in environment variables.')
+    throw new Error('LOCAL_DATABASE_URL or DATABASE_URL is not set in environment variables.')
   }
 
   // If it's a prisma+postgres protocol, extract the underlying postgres:// URL from the api_key parameter
@@ -33,6 +36,8 @@ const getDbClient = () => {
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
   })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })

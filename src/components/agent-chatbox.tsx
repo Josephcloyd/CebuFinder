@@ -206,33 +206,32 @@ export function AgentChatbox() {
       {/* Floating Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 flex items-center justify-center text-white shadow-xl shadow-purple-500/25 hover:scale-105 cursor-pointer z-50 transition-all border border-purple-400/20 hover:border-purple-300/40 glow-animation hover:shadow-purple-500/35"
+        className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-primary bg-primary text-primary-foreground shadow-md transition-colors hover:bg-[#355448] sm:bottom-6 sm:right-6"
         aria-label="Open AI Assistant"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
+        {isOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
       </button>
 
       {/* Expandable Chat Drawer */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-[420px] max-w-[calc(100vw-2rem)] h-[600px] max-h-[calc(100vh-8rem)] bg-zinc-950/95 backdrop-blur-xl rounded-2xl flex flex-col shadow-2xl shadow-purple-500/5 border border-zinc-800/60 z-50 overflow-hidden animate-scale-in">
+        <div className="fixed bottom-18 right-3 z-50 flex h-[min(620px,calc(100vh-6rem))] w-[420px] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-xl sm:bottom-20 sm:right-6">
           {/* Header */}
-          <div className="p-4 border-b border-zinc-800/50 bg-zinc-950/90 backdrop-blur-xl flex items-center justify-between relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/[0.03] to-transparent pointer-events-none" />
+          <div className="flex items-center justify-between border-b border-border bg-card p-4">
             <div className="flex items-center gap-2.5 relative z-10">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/15 flex items-center justify-center text-purple-400">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Sparkles className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-white">Lead Growth Copilot</h4>
+                <h4 className="text-sm font-semibold text-foreground">Workspace assistant</h4>
                 <div className="flex items-center gap-1 mt-0.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Cebu Finder AI</span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-600"></span>
+                  <span className="text-[10px] text-muted-foreground">Ready to help</span>
                 </div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-lg border border-zinc-800/60 bg-zinc-900/50 text-zinc-500 hover:text-white cursor-pointer transition-all hover:bg-zinc-800/50 relative z-10"
+              className="p-1.5 rounded-lg border border-border bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-all hover:bg-secondary relative z-10"
             >
               <X className="w-4 h-4" />
             </button>
@@ -248,10 +247,10 @@ export function AgentChatbox() {
                   }`}
                 >
                   <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-[13px] whitespace-pre-line leading-relaxed ${
+                    className={`max-w-[85%] rounded-xl px-4 py-2.5 text-[13px] whitespace-pre-line leading-relaxed ${
                       msg.role === 'user'
-                        ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-br-sm shadow-lg shadow-purple-500/10'
-                        : 'bg-zinc-900/80 text-zinc-200 rounded-bl-sm border border-zinc-800/50'
+                        ? 'bg-primary text-primary-foreground rounded-br-sm'
+                        : 'bg-secondary text-foreground rounded-bl-sm'
                     }`}
                   >
                     {msg.content}
@@ -260,44 +259,44 @@ export function AgentChatbox() {
 
                 {/* Loading Action Spinner */}
                 {msg.loadingAction && (
-                  <div className="flex items-center gap-2 text-xs text-zinc-400 pl-4 py-1.5">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" />
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground pl-4 py-1.5">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-primary" />
                     <span>Executing system query...</span>
                   </div>
                 )}
 
                 {/* Show Action Result Message if failed or custom text */}
                 {msg.actionResult && (
-                  <div className="text-xs font-semibold p-2.5 rounded-lg border border-zinc-800 bg-zinc-950/80 text-zinc-400 pl-4">
+                  <div className="text-xs font-semibold p-2.5 rounded-lg border border-border bg-background text-muted-foreground pl-4">
                     {msg.actionResult}
                   </div>
                 )}
 
                 {/* Custom Lead Cards Slider */}
                 {msg.leads && msg.leads.length > 0 && (
-                  <div className="overflow-x-auto py-2 flex gap-3 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent pl-2">
+                  <div className="flex gap-3 overflow-x-auto py-2 pl-2">
                     {msg.leads.map((lead, lIdx) => (
                       <div
                         key={lIdx}
-                        className="flex-shrink-0 w-64 bg-zinc-950/80 border border-zinc-800/50 rounded-xl p-3.5 space-y-2.5 hover:border-purple-500/20 transition-all shadow-lg hover:shadow-purple-500/5"
+                        className="w-64 flex-shrink-0 space-y-2.5 rounded-lg border border-border bg-background p-3.5 transition-colors hover:border-primary/30"
                       >
                         <div className="flex justify-between items-start">
-                          <h5 className="font-bold text-xs text-white truncate max-w-[80%]">
+                          <h5 className="font-bold text-xs text-foreground truncate max-w-[80%]">
                             {lead.name}
                           </h5>
-                          <span className="text-[9px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded-full font-bold uppercase truncate max-w-[40%]">
+                          <span className="text-[9px] bg-primary/10 text-primary border border-primary/30 px-1.5 py-0.5 rounded-full font-bold uppercase truncate max-w-[40%]">
                             {lead.barangay}
                           </span>
                         </div>
 
-                        <div className="space-y-1.5 text-[10px] text-zinc-400">
+                        <div className="space-y-1.5 text-[10px] text-muted-foreground">
                           <div className="flex items-center gap-1.5">
-                            <Tag className="w-3.5 h-3.5 text-zinc-500" />
+                            <Tag className="w-3.5 h-3.5 text-muted-foreground" />
                             <span>{lead.businessCategory}</span>
                           </div>
 
                           <div className="flex items-center gap-1.5">
-                            <Globe className="w-3.5 h-3.5 text-zinc-500" />
+                            <Globe className="w-3.5 h-3.5 text-muted-foreground" />
                             <span className="truncate">
                               {lead.digitalPresence?.websiteUrl || lead.digitalPresence?.facebookUrl || 'No digital presence'}
                             </span>
@@ -305,7 +304,7 @@ export function AgentChatbox() {
 
                           {lead.contacts?.[0]?.contactValue && (
                             <div className="flex items-center gap-1.5">
-                              <Phone className="w-3.5 h-3.5 text-zinc-500" />
+                              <Phone className="w-3.5 h-3.5 text-muted-foreground" />
                               <span>{lead.contacts[0].contactValue}</span>
                             </div>
                           )}
@@ -313,7 +312,7 @@ export function AgentChatbox() {
 
                         <a
                           href={`/leads?id=${lead.id}`}
-                          className="flex items-center justify-between text-[10px] text-purple-400 font-bold bg-zinc-900 border border-zinc-850 hover:bg-zinc-850 px-2.5 py-1.5 rounded-lg w-full transition-colors cursor-pointer"
+                          className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-2.5 py-1.5 text-[10px] font-medium text-primary transition-colors hover:bg-secondary"
                         >
                           <span>Open in CRM</span>
                           <ExternalLink className="w-3 h-3" />
@@ -328,10 +327,10 @@ export function AgentChatbox() {
             {/* AI Typing Indicator */}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-zinc-900 text-zinc-400 border border-zinc-800/80 rounded-2xl rounded-bl-none px-4 py-2.5 text-sm flex items-center gap-1.5 shadow-inner">
-                  <span className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <div className="bg-card text-muted-foreground border border-border rounded-xl rounded-bl-none px-4 py-2.5 text-sm flex items-center gap-1.5 shadow-inner">
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" style={{ animationDelay: '0ms' }}></span>
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" style={{ animationDelay: '150ms' }}></span>
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" style={{ animationDelay: '300ms' }}></span>
                 </div>
               </div>
             )}
@@ -341,14 +340,14 @@ export function AgentChatbox() {
 
           {/* Quick Replies chips */}
           {messages.length === 1 && !isLoading && (
-            <div className="p-3 bg-zinc-950/40 border-t border-zinc-900/60 flex flex-wrap gap-2">
+            <div className="p-3 bg-background/40 border-t border-border flex flex-wrap gap-2">
               {quickReplies.map((reply, index) => (
                 <button
                   key={index}
                   onClick={() => {
                     setInputValue(reply.query)
                   }}
-                  className="text-[10px] font-semibold px-2.5 py-1 border border-zinc-850 bg-zinc-900/40 text-zinc-400 hover:text-white hover:border-zinc-700 hover:bg-zinc-900 rounded-full cursor-pointer transition-all duration-150"
+                  className="rounded-full border border-border bg-card px-2.5 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   {reply.text}
                 </button>
@@ -357,19 +356,19 @@ export function AgentChatbox() {
           )}
 
           {/* Chat Form Input */}
-          <form onSubmit={handleSend} className="p-3 border-t border-zinc-800/50 bg-zinc-950/90 backdrop-blur-xl flex items-center gap-2">
+          <form onSubmit={handleSend} className="p-3 border-t border-border bg-card/95 backdrop-blur-xl flex items-center gap-2">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask growth assistant..."
-              className="flex-1 bg-zinc-900/50 border border-zinc-800/60 rounded-xl px-3.5 py-2.5 text-[13px] text-zinc-200 focus:outline-none focus:border-purple-500/50 transition-colors placeholder:text-zinc-600"
+              className="flex-1 bg-secondary border border-border rounded-xl px-3.5 py-2.5 text-[13px] text-foreground focus:outline-none focus:border-primary transition-colors placeholder:text-muted-foreground"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={isLoading || !inputValue.trim()}
-              className="w-10 h-10 rounded-xl btn-primary text-white flex items-center justify-center cursor-pointer disabled:opacity-30 transition-all"
+              className="w-10 h-10 rounded-xl btn-primary text-foreground flex items-center justify-center cursor-pointer disabled:opacity-30 transition-all"
             >
               <Send className="w-4 h-4" />
             </button>

@@ -47,23 +47,25 @@ enum OutreachStatus {
 }
 
 model Business {
-  id               String          @id @default(uuid()) @db.Uuid
-  name             String
-  normalizedName   String          @map("normalized_name")
-  businessCategory String          @map("business_category")
-  description      String?
-  barangay         String
-  city             String          @default("Cebu City")
-  province         String          @default("Cebu")
-  latitude         Decimal?        @db.Decimal(10, 8)
-  longitude        Decimal?        @db.Decimal(11, 8)
-  discoverySource  DiscoverySource @map("discovery_source")
-  sourceUrl        String?         @map("source_url")
-  dateDiscovered   DateTime        @default(now()) @map("date_discovered")
-  dateLastChecked  DateTime        @default(now()) @map("date_last_checked")
-  notes            String?         @default("")
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
+  id                    String          @id @default(uuid()) @db.Uuid
+  name                  String
+  normalizedName        String          @map("normalized_name")
+  businessCategory      String          @map("business_category")
+  description           String?
+  barangay              String
+  city                  String          @default("Cebu City")
+  province              String          @default("Cebu")
+  latitude              Decimal?        @db.Decimal(10, 8)
+  longitude             Decimal?        @db.Decimal(11, 8)
+  discoverySource       DiscoverySource @map("discovery_source")
+  sourceUrl             String?         @map("source_url")
+  establishedYear       Int?            @map("established_year")
+  establishedYearSource String?         @map("established_year_source")
+  dateDiscovered        DateTime        @default(now()) @map("date_discovered")
+  dateLastChecked       DateTime        @default(now()) @map("date_last_checked")
+  notes                 String?         @default("")
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
 
   digitalPresence     DigitalPresence?
   contacts            Contact[]
@@ -76,21 +78,42 @@ model Business {
   @@map("businesses")
 }
 
+model DiscoveryScan {
+  id           String    @id @default(uuid()) @db.Uuid
+  category     String
+  city         String
+  barangay     String?
+  status       String    @default("QUEUED")
+  message      String    @default("Waiting to start")
+  foundCount   Int       @default(0) @map("found_count")
+  addedCount   Int       @default(0) @map("added_count")
+  updatedCount Int       @default(0) @map("updated_count")
+  skippedCount Int       @default(0) @map("skipped_count")
+  error        String?
+  startedAt    DateTime? @map("started_at")
+  completedAt  DateTime? @map("completed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, createdAt], map: "idx_discovery_scans_status_created")
+  @@map("discovery_scans")
+}
+
 model DigitalPresence {
-  id                 String        @id @default(uuid()) @db.Uuid
-  businessId         String        @unique @map("business_id") @db.Uuid
-  websiteUrl         String?       @map("website_url")
-  websiteStatus      WebsiteStatus @default(NO_WEBSITE) @map("website_status")
-  httpStatusCode     Int?          @map("http_status_code")
-  hasSsl             Boolean       @default(false) @map("has_ssl")
-  isMobileResponsive Boolean       @default(false) @map("is_mobile_responsive")
-  facebookUrl        String?       @map("facebook_url")
-  instagramUrl       String?       @map("instagram_url")
-  hasOnlineBooking   Boolean       @default(false) @map("has_online_booking")
-  hasEcommerce       Boolean       @default(false) @map("has_ecommerce")
-  detectedTechnologies Json        @default("[]") @map("detected_technologies")
-  rawAuditData       Json          @default("{}") @map("raw_audit_data")
-  auditedAt          DateTime      @default(now()) @map("audited_at")
+  id                   String        @id @default(uuid()) @db.Uuid
+  businessId           String        @unique @map("business_id") @db.Uuid
+  websiteUrl           String?       @map("website_url")
+  websiteStatus        WebsiteStatus @default(NO_WEBSITE) @map("website_status")
+  httpStatusCode       Int?          @map("http_status_code")
+  hasSsl               Boolean       @default(false) @map("has_ssl")
+  isMobileResponsive   Boolean       @default(false) @map("is_mobile_responsive")
+  facebookUrl          String?       @map("facebook_url")
+  instagramUrl         String?       @map("instagram_url")
+  hasOnlineBooking     Boolean       @default(false) @map("has_online_booking")
+  hasEcommerce         Boolean       @default(false) @map("has_ecommerce")
+  detectedTechnologies Json          @default("[]") @map("detected_technologies")
+  rawAuditData         Json          @default("{}") @map("raw_audit_data")
+  auditedAt            DateTime      @default(now()) @map("audited_at")
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
@@ -116,17 +139,17 @@ model Contact {
 }
 
 model OpportunityAnalysis {
-  id                  String   @id @default(uuid()) @db.Uuid
-  businessId          String   @unique @map("business_id") @db.Uuid
-  primaryProblem      String   @map("primary_problem")
-  recommendedService  String   @map("recommended_service")
-  opportunitySummary  String   @map("opportunity_summary")
-  recommendedOffer    String   @map("recommended_offer")
-  leadScore           Int      @map("lead_score")
-  confidenceScore     Decimal  @map("confidence_score") @db.Decimal(3, 2)
-  aiModel             String   @map("ai_model")
-  analysisRawJson     Json     @map("analysis_raw_json")
-  analyzedAt          DateTime @default(now()) @map("analyzed_at")
+  id                 String   @id @default(uuid()) @db.Uuid
+  businessId         String   @unique @map("business_id") @db.Uuid
+  primaryProblem     String   @map("primary_problem")
+  recommendedService String   @map("recommended_service")
+  opportunitySummary String   @map("opportunity_summary")
+  recommendedOffer   String   @map("recommended_offer")
+  leadScore          Int      @map("lead_score")
+  confidenceScore    Decimal  @map("confidence_score") @db.Decimal(3, 2)
+  aiModel            String   @map("ai_model")
+  analysisRawJson    Json     @map("analysis_raw_json")
+  analyzedAt         DateTime @default(now()) @map("analyzed_at")
 
   business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
@@ -158,15 +181,15 @@ model Outreach {
 }
 
 model Followup {
-  id          String   @id @default(uuid()) @db.Uuid
-  outreachId  String   @map("outreach_id") @db.Uuid
-  stepNumber  Int      @map("step_number")
-  scheduledAt DateTime @map("scheduled_at")
-  status      String   @default("SCHEDULED")
+  id          String    @id @default(uuid()) @db.Uuid
+  outreachId  String    @map("outreach_id") @db.Uuid
+  stepNumber  Int       @map("step_number")
+  scheduledAt DateTime  @map("scheduled_at")
+  status      String    @default("SCHEDULED")
   subject     String
-  messageBody String   @map("message_body")
+  messageBody String    @map("message_body")
   sentAt      DateTime? @map("sent_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   outreach Outreach @relation(fields: [outreachId], references: [id], onDelete: Cascade)
 

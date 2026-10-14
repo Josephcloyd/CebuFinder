@@ -51,6 +51,8 @@ export const BusinessSchema = z.object({
   longitude: z.number().optional().nullable(),
   discoverySource: DiscoverySourceSchema,
   sourceUrl: z.string().url('Invalid source URL').optional().nullable(),
+  establishedYear: z.number().int().min(1800).max(new Date().getFullYear()).optional().nullable(),
+  establishedYearSource: z.string().optional().nullable(),
   dateDiscovered: z.date().optional(),
   dateLastChecked: z.date().optional(),
   createdAt: z.date().optional(),

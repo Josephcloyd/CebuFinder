@@ -12,12 +12,12 @@ const CebuMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full bg-zinc-950 flex items-center justify-center">
+      <div className="w-full h-full bg-background flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mx-auto animate-pulse">
-            <MapPin className="w-5 h-5 text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex items-center justify-center mx-auto animate-pulse">
+            <MapPin className="w-5 h-5 text-primary" />
           </div>
-          <p className="text-zinc-500 text-sm font-semibold">Loading Cebu Map...</p>
+          <p className="text-muted-foreground text-sm font-semibold">Loading Cebu Map...</p>
         </div>
       </div>
     ),
@@ -85,38 +85,38 @@ export default function CebuMapExplorerPage() {
 
   return (
     // Full-screen container: fills the parent dashboard content area
-    <div className="relative w-full flex flex-col" style={{ height: 'calc(100vh - 56px)' }}>
+    <div className="relative flex w-full flex-col" style={{ height: 'calc(100vh - 64px)' }}>
 
       {/* ── TOP HUD BAR ─────────────────────────────────────────── */}
-      <div className="absolute top-4 left-4 right-4 z-[1001] flex items-start gap-3 pointer-events-none">
+      <div className="pointer-events-none absolute left-3 right-3 top-3 z-[1001] flex flex-wrap items-start gap-2 sm:left-4 sm:right-4 sm:top-4">
 
         {/* Title chip */}
-        <div className="pointer-events-auto flex items-center gap-2.5 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800/80 rounded-2xl px-4 py-2.5 shadow-2xl">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-            <MapPin className="w-4 h-4 text-white" />
+        <div className="pointer-events-auto flex items-center gap-2.5 rounded-lg border border-border bg-card/95 px-3 py-2 backdrop-blur-md sm:px-4">
+          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-lg ">
+            <MapPin className="w-4 h-4 text-foreground" />
           </div>
           <div>
-            <h2 className="text-sm font-black text-white leading-none">Cebu Map Explorer</h2>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Click any pin to inspect</p>
+            <h2 className="text-sm font-semibold leading-none text-foreground">Map explorer</h2>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Click any pin to inspect</p>
           </div>
         </div>
 
         {/* Stats chips */}
-        <div className="pointer-events-auto flex items-center gap-2">
-          <div className="bg-zinc-950/95 backdrop-blur-xl border border-zinc-800/80 rounded-2xl px-3.5 py-2 shadow-xl flex items-center gap-2">
-            <Layers className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-xs font-bold text-white">{leads.length}</span>
-            <span className="text-[10px] text-zinc-500">Businesses</span>
+        <div className="pointer-events-auto hidden items-center gap-2 md:flex">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-card/95 px-3.5 py-2 backdrop-blur-md">
+            <Layers className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-bold text-foreground">{leads.length}</span>
+            <span className="text-[10px] text-muted-foreground">Businesses</span>
           </div>
-          <div className="bg-zinc-950/95 backdrop-blur-xl border border-red-900/40 rounded-2xl px-3.5 py-2 shadow-xl flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-card/95 px-3.5 py-2 backdrop-blur-md">
             <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
             <span className="text-xs font-bold text-red-400">{highOpportunityCount}</span>
-            <span className="text-[10px] text-zinc-500">No Website</span>
+            <span className="text-[10px] text-muted-foreground">No Website</span>
           </div>
-          <div className="bg-zinc-950/95 backdrop-blur-xl border border-amber-900/40 rounded-2xl px-3.5 py-2 shadow-xl flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-card/95 px-3.5 py-2 backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-xs font-bold text-amber-400">{fbOnlyCount}</span>
-            <span className="text-[10px] text-zinc-500">FB Only</span>
+            <span className="text-[10px] text-muted-foreground">FB Only</span>
           </div>
         </div>
 
@@ -128,16 +128,16 @@ export default function CebuMapExplorerPage() {
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters((v) => !v)}
-            className={`relative flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-semibold transition-all shadow-xl backdrop-blur-xl ${
+            className={`relative flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-medium backdrop-blur-md transition-colors ${
               showFilters
-                ? 'bg-purple-600 border-purple-500 text-white'
-                : 'bg-zinc-950/95 border-zinc-800/80 text-zinc-300 hover:text-white hover:bg-zinc-900'
+                ? 'bg-primary border-primary text-foreground'
+                : 'bg-card/95 border-border text-foreground hover:text-foreground hover:bg-card'
             }`}
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
             Filters
             {activeFilterCount > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-purple-500 text-[9px] font-black text-white flex items-center justify-center">
+              <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground">
                 {activeFilterCount}
               </span>
             )}
@@ -147,23 +147,23 @@ export default function CebuMapExplorerPage() {
           <button
             onClick={fetchMapLeads}
             disabled={isLoading}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-zinc-950/95 border border-zinc-800/80 text-zinc-300 hover:text-white text-xs font-semibold transition-all hover:bg-zinc-900 disabled:opacity-50 shadow-xl backdrop-blur-xl"
+            className="hidden h-9 items-center gap-2 rounded-lg border border-border bg-card/95 px-3 text-xs font-medium text-foreground backdrop-blur-md transition-colors hover:bg-secondary disabled:opacity-50 sm:flex"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
             {isLoading ? 'Loading...' : 'Refresh'}
           </button>
 
           {/* View Mode Toggle */}
-          <div className="flex items-center gap-0.5 bg-zinc-950/95 border border-zinc-800/80 rounded-2xl p-1 shadow-xl backdrop-blur-xl">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border bg-card/95 p-1 backdrop-blur-md">
             <button
               onClick={() => setViewMode('pins')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${viewMode === 'pins' ? 'bg-purple-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${viewMode === 'pins' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <Layers className="w-3.5 h-3.5" /> Pins
             </button>
             <button
               onClick={() => setViewMode('heatmap')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${viewMode === 'heatmap' ? 'bg-red-600 text-white shadow-lg' : 'text-zinc-400 hover:text-white'}`}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${viewMode === 'heatmap' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               <Flame className="w-3.5 h-3.5" /> Heatmap
             </button>
@@ -173,13 +173,13 @@ export default function CebuMapExplorerPage() {
 
       {/* ── FILTER PANEL (dropdown below top bar) ───────────────── */}
       {showFilters && (
-        <div className="absolute top-[72px] right-4 z-[1001] w-72 bg-zinc-950/98 backdrop-blur-xl border border-zinc-800/80 rounded-2xl shadow-2xl p-4 space-y-3">
+        <div className="absolute right-3 top-[64px] z-[1001] w-[calc(100%-1.5rem)] max-w-72 space-y-3 rounded-xl border border-border bg-card p-4 shadow-lg sm:right-4 sm:top-[72px]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Filter Businesses</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Filter Businesses</span>
             {activeFilterCount > 0 && (
               <button
                 onClick={() => { setCity('ALL'); setBarangay('ALL'); setCategory('ALL'); setStatus('ALL') }}
-                className="text-[10px] text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                className="text-[10px] text-primary hover:text-primary font-semibold transition-colors"
               >
                 Clear all
               </button>
@@ -193,11 +193,11 @@ export default function CebuMapExplorerPage() {
             { label: 'Digital Gap Status', value: status, setter: setStatus, options: [['ALL', 'All Statuses'], ['NO_WEBSITE', '🔴 No Website / Broken'], ['FACEBOOK_ONLY', '🟡 Facebook Only'], ['FULLY_FUNCTIONAL', '🟢 Functional Website']] },
           ].map(({ label, value, setter, options }) => (
             <div key={label}>
-              <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">{label}</label>
+              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">{label}</label>
               <select
                 value={value}
                 onChange={(e) => setter(e.target.value)}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500/50 appearance-none cursor-pointer"
+                className="w-full bg-card border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:outline-none focus:border-primary appearance-none cursor-pointer"
               >
                 {options.map(([v, lbl]) => <option key={v} value={v}>{lbl}</option>)}
               </select>
@@ -224,25 +224,25 @@ export default function CebuMapExplorerPage() {
           onClick={() => setSelectedLead(null)}
         >
           <div
-            className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-slide-up"
+            className="relative w-full max-w-lg bg-background border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh] animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-5 border-b border-zinc-900 bg-gradient-to-r from-purple-900/30 via-zinc-950 to-zinc-950 flex items-start justify-between">
+            <div className="flex items-start justify-between border-b border-border bg-card p-5">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Building2 className="w-5 h-5 text-purple-400" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Building2 className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/20">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/30">
                       {selectedLead.category}
                     </span>
                     {getStatusPill(selectedLead.websiteStatus)}
                   </div>
-                  <h3 className="text-xl font-black text-white leading-tight">{selectedLead.name}</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-zinc-500" />
+                  <h3 className="text-xl font-semibold text-foreground leading-tight">{selectedLead.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-muted-foreground" />
                     {selectedLead.barangay}, {selectedLead.city}
                   </p>
                 </div>
@@ -250,7 +250,7 @@ export default function CebuMapExplorerPage() {
 
               <button
                 onClick={() => setSelectedLead(null)}
-                className="w-8 h-8 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition-colors flex-shrink-0"
+                className="w-8 h-8 rounded-lg bg-card hover:bg-secondary border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -260,47 +260,47 @@ export default function CebuMapExplorerPage() {
             <div className="p-5 space-y-4 overflow-y-auto">
               {/* Score + Coordinates */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">Opportunity Score</span>
+                <div className="p-3.5 rounded-xl bg-card border border-border">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Opportunity Score</span>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-purple-400">{selectedLead.leadScore}</span>
-                    <span className="text-xs text-zinc-500 font-semibold">/ 100</span>
+                    <span className="text-3xl font-semibold text-primary">{selectedLead.leadScore}</span>
+                    <span className="text-xs text-muted-foreground font-semibold">/ 100</span>
                   </div>
                   {/* Score bar */}
-                  <div className="mt-2 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div className="mt-2 h-1.5 bg-secondary rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-purple-600 to-indigo-500 rounded-full transition-all"
+                      className="h-full rounded-full bg-primary transition-all"
                       style={{ width: `${selectedLead.leadScore}%` }}
                     />
                   </div>
                 </div>
-                <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800/60">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block mb-1">GPS Coordinates</span>
-                  <div className="text-xs text-zinc-400 font-mono space-y-0.5 mt-1">
-                    <div>Lat: <span className="text-zinc-200">{selectedLead.lat.toFixed(5)}</span></div>
-                    <div>Lng: <span className="text-zinc-200">{selectedLead.lng.toFixed(5)}</span></div>
+                <div className="p-3.5 rounded-xl bg-card border border-border">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">GPS Coordinates</span>
+                  <div className="text-xs text-muted-foreground font-mono space-y-0.5 mt-1">
+                    <div>Lat: <span className="text-foreground">{selectedLead.lat.toFixed(5)}</span></div>
+                    <div>Lng: <span className="text-foreground">{selectedLead.lng.toFixed(5)}</span></div>
                   </div>
                 </div>
               </div>
 
               {/* Digital Audit */}
               <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                   <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
                   Digital Audit Findings
                 </h4>
-                <div className="p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/40 space-y-2.5 text-xs">
+                <div className="p-3.5 rounded-xl bg-card border border-border space-y-2.5 text-xs">
                   <div>
-                    <span className="text-zinc-500 font-semibold">Primary Issue: </span>
+                    <span className="text-muted-foreground font-semibold">Primary Issue: </span>
                     <span className="text-red-400 font-bold">{selectedLead.primaryProblem}</span>
                   </div>
                   <div>
-                    <span className="text-zinc-500 font-semibold">Recommended Offer: </span>
-                    <span className="text-purple-300 font-bold">{selectedLead.recommendedOffer}</span>
+                    <span className="text-muted-foreground font-semibold">Recommended Offer: </span>
+                    <span className="text-primary font-bold">{selectedLead.recommendedOffer}</span>
                   </div>
                   {selectedLead.contactsCount > 0 && (
-                    <div className="pt-2 border-t border-zinc-800">
-                      <span className="text-zinc-500 font-semibold">Contacts on File: </span>
+                    <div className="pt-2 border-t border-border">
+                      <span className="text-muted-foreground font-semibold">Contacts on File: </span>
                       <span className="text-emerald-400 font-bold">{selectedLead.contactsCount} contact(s)</span>
                     </div>
                   )}
@@ -309,7 +309,7 @@ export default function CebuMapExplorerPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-zinc-900 bg-zinc-950 flex items-center justify-between gap-3">
+            <div className="p-4 border-t border-border bg-background flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 {selectedLead.facebookUrl && (
                   <a
@@ -341,9 +341,9 @@ export default function CebuMapExplorerPage() {
                   setPitchModalLeadName(selectedLead.name)
                   setSelectedLead(null)
                 }}
-                className="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-purple-500/25 flex items-center gap-2 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-primary hover:bg-[#355448] text-foreground text-xs font-bold shadow-lg  flex items-center gap-2 transition-all cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-purple-200" />
+                <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
                 ✨ AI Pitch Studio
               </button>
             </div>

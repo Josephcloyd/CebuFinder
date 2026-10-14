@@ -29,6 +29,17 @@ export interface DiscoveredBusiness {
   websiteUrl?: string
   facebookUrl?: string
   phone?: string
+  establishedYear?: number
+  establishedYearSource?: string
+}
+
+function extractEstablishedYear(value?: string): number | undefined {
+  if (!value) return undefined
+  const match = value.match(/\b(18\d{2}|19\d{2}|20\d{2})\b/)
+  if (!match) return undefined
+
+  const year = Number(match[1])
+  return year <= new Date().getFullYear() ? year : undefined
 }
 
 // Maps our standard category names to OSM amenity/shop key-values
@@ -205,6 +216,8 @@ export class DiscoveryService {
 
         // Parse public phone numbers
         const rawPhone = tags.phone || tags['contact:phone'] || tags['contact:mobile'] || undefined
+        const establishedTag = tags.start_date || tags.opening_date || tags.established
+        const establishedYear = extractEstablishedYear(establishedTag)
 
         results.push({
           name,
@@ -220,6 +233,8 @@ export class DiscoveryService {
           websiteUrl: tags.website || tags['contact:website'] || undefined,
           facebookUrl: tags['contact:facebook'] || undefined,
           phone: rawPhone,
+          establishedYear,
+          establishedYearSource: establishedYear ? 'OpenStreetMap public listing' : undefined,
         })
       }
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '../../../../lib/db'
 import { calculateLeadScore } from '../../../../lib/utils/lead-scorer'
+import { withDatabaseRetry } from '../../../../lib/db/retry'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -10,6 +11,7 @@ export async function GET(request: Request) {
   const status = searchParams.get('status')
   const minScore = searchParams.get('minScore')
   const hasContacts = searchParams.get('hasContacts')
+  const websiteStatus = searchParams.get('websiteStatus')
   const query = searchParams.get('query')
 
   try {
@@ -19,6 +21,10 @@ export async function GET(request: Request) {
       where.contacts = { some: {} }
     } else if (hasContacts === 'false') {
       where.contacts = { none: {} }
+    }
+
+    if (websiteStatus === 'FULLY_FUNCTIONAL' || websiteStatus === 'OUTDATED_SITE') {
+      where.digitalPresence = { websiteStatus }
     }
 
     if (city) {
@@ -40,20 +46,20 @@ export async function GET(request: Request) {
       }
     }
 
-    const leads = await prisma.business.findMany({
-      where,
-      include: {
-        digitalPresence: true,
-        opportunityAnalysis: true,
-        contacts: true,
-        outreach: {
-          orderBy: { createdAt: 'desc' },
-          take: 1
-        }
-      },
-      orderBy: { dateDiscovered: 'desc' },
-      take: 100
-    })
+    const leads = await withDatabaseRetry(() => prisma.business.findMany({
+        where,
+        include: {
+          digitalPresence: true,
+          opportunityAnalysis: true,
+          contacts: true,
+          outreach: {
+            orderBy: { createdAt: 'desc' },
+            take: 1
+          }
+        },
+        orderBy: { dateDiscovered: 'desc' },
+        take: 100
+      }))
 
     // Process leads and auto-calculate opportunity score & analysis if missing
     let processedLeads = leads.map((lead: any) => {
@@ -123,8 +129,11 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, count: processedLeads.length, leads: processedLeads })
   } catch (error: any) {
-    console.error('Error fetching leads:', error.message)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    console.error('Error fetching leads:', error)
+    return NextResponse.json(
+      { success: false, error: 'Unable to load leads right now. Please try again.' },
+      { status: 503 },
+    )
   }
 }
 
@@ -150,7 +159,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, contact: newContact })
   } catch (error: any) {
-    console.error('Error adding contact:', error.message)
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    console.error('Error adding contact:', error)
+    return NextResponse.json(
+      { success: false, error: 'Unable to add the contact right now. Please try again.' },
+      { status: 503 },
+    )
   }
 }

@@ -6,6 +6,12 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { name, businessCategory, barangay, city, latitude, longitude, discoverySource } = body
+    const parsedEstablishedYear = body.establishedYear ? Number(body.establishedYear) : null
+    const currentYear = new Date().getFullYear()
+
+    if (parsedEstablishedYear && (!Number.isInteger(parsedEstablishedYear) || parsedEstablishedYear < 1800 || parsedEstablishedYear > currentYear)) {
+      return NextResponse.json({ success: false, error: `Established year must be between 1800 and ${currentYear}` }, { status: 400 })
+    }
 
     if (!name || !businessCategory || !barangay) {
       return NextResponse.json({ success: false, error: 'name, businessCategory, and barangay are required' }, { status: 400 })
@@ -29,6 +35,8 @@ export async function POST(request: Request) {
         latitude: latitude ?? null,
         longitude: longitude ?? null,
         discoverySource: discoverySource || 'MANUAL_ENTRY',
+        establishedYear: parsedEstablishedYear,
+        establishedYearSource: parsedEstablishedYear ? 'Manually entered' : null,
         digitalPresence: {
           create: {
             websiteStatus: 'NO_WEBSITE',

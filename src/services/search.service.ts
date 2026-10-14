@@ -8,6 +8,22 @@ interface GoogleSearchItem {
   snippet: string
 }
 
+function extractEstablishedYear(text: string): number | undefined {
+  const patterns = [
+    /\b(?:since|established|founded|opened|operating since|in business since)\s*(?:in\s*)?(18\d{2}|19\d{2}|20\d{2})\b/i,
+    /\best\.?\s*(18\d{2}|19\d{2}|20\d{2})\b/i,
+  ]
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern)
+    if (!match) continue
+    const year = Number(match[1])
+    if (year <= new Date().getFullYear()) return year
+  }
+
+  return undefined
+}
+
 export class SearchService {
   /**
    * Search Google Custom Search API for businesses of a category in a barangay.
@@ -58,6 +74,7 @@ export class SearchService {
 
         let facebookUrl: string | undefined = undefined
         let websiteUrl: string | undefined = undefined
+        const establishedYear = extractEstablishedYear(`${item.title} ${item.snippet}`)
 
         if (link.includes('facebook.com/')) {
           facebookUrl = item.link
@@ -75,6 +92,8 @@ export class SearchService {
           sourceUrl: item.link,
           websiteUrl,
           facebookUrl,
+          establishedYear,
+          establishedYearSource: establishedYear ? 'Google public search snippet' : undefined,
         })
       }
 
@@ -126,6 +145,8 @@ export class SearchService {
           sourceUrl: 'https://mabolo-family-dentist-ph.co',
           websiteUrl: 'http://mabolo-family-dentist-ph.co', // Old website, offline or insecure
           phone: '0322314567',
+          establishedYear: 2018,
+          establishedYearSource: 'Public business description',
         }
       ]
     }
